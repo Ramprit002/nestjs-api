@@ -6,15 +6,22 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import jwt from 'jsonwebtoken';
 import { UserResponseInterface } from './interface/user-response.interface';
-import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { LoginUserDto } from './dto/login-user.dto';
+import { Req } from '@nestjs/common';
+import { Request } from 'express';
+import { User } from './user.decorator';
+import { UserEntity } from './entities/user.entity';
+import { AuthGuard } from './auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UserController {
@@ -43,6 +50,12 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('/currentUser')
+  @UseGuards(AuthGuard)
+  async currentUser(@User() user: UserEntity): Promise<UserResponseInterface> {
+    return this.userService.buildUserResponse(user);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
@@ -56,5 +69,15 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Post('upload')
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async addAvatar(
+    @User('id') user: string,
+    @UploadedFile() file: any,
+  ) {
+    return this.userService.uploadImage(user, file.buffer, file.originalname);
   }
 }

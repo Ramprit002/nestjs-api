@@ -1,5 +1,14 @@
+import { ImageEntity } from './image.entity';
 import { IsEmail } from 'class-validator';
-import { Entity, Column, Unique, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  Column,
+  Unique,
+  BeforeInsert,
+  BeforeUpdate,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { CustomBaseEntity } from '../../common/base-entity';
@@ -22,6 +31,13 @@ export class UserEntity extends CustomBaseEntity {
 
   @Column({ nullable: true })
   mobile: string;
+
+  @JoinColumn()
+  @OneToOne(() => ImageEntity, {
+    eager: true,
+    nullable: true,
+  })
+  image?: ImageEntity;
 
   @BeforeInsert()
   @BeforeUpdate()

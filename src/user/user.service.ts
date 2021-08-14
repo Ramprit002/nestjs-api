@@ -1,3 +1,4 @@
+import { ImageService } from './image.service';
 import {
   Injectable,
   HttpException,
@@ -21,6 +22,7 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly imageService: ImageService,
   ) {}
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
     try {
@@ -84,9 +86,9 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  findOne(id: string): Promise<UserEntity> {
-    const user = this.userRepository.findOne(id);
-    if (user) {
+  async findOne(id: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ id });
+    if (!user) {
       throw new NotFoundException('User not found.');
     }
     return user;
@@ -96,13 +98,24 @@ export class UserService {
     return `This action updates a #${id} user`;
   }
 
+  async uploadImage(userId: string, imageBuffer: Buffer, filename: string) {
+    const image = await this.imageService.uploadImage(imageBuffer, filename);
+    const user = await this.findOne(userId);
+    await this.userRepository.update(userId, {
+      ...user,
+      image,
+    });
+    return image;
+  }
+
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
 
   generateJwt(user: UserEntity): string {
-    return jwt.sign({ user_id: user.id }, process.env.JWT_SECRET || 'random');
+    return jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'random');
   }
+
   buildUserResponse(user: UserEntity): UserResponseInterface {
     return {
       user: {
