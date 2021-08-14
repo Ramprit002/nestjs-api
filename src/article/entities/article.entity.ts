@@ -1,4 +1,4 @@
-import { CustomBaseEntity } from 'src/common/baseEntity';
+import { CustomBaseEntity } from 'src/common/base-entity';
 import { Entity, Column } from 'typeorm';
 
 @Entity({ name: 'articles' })

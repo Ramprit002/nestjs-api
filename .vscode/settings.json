@@ -1,3 +1,9 @@
 {
-  "cSpell.words": ["nestjs", "ormconfig", "timestamptz", "typeorm"]
+  "cSpell.words": [
+    "POSTGRES",
+    "nestjs",
+    "ormconfig",
+    "timestamptz",
+    "typeorm"
+  ]
 }

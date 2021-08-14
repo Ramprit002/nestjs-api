@@ -2,10 +2,10 @@ import { IsEmail } from 'class-validator';
 import { Entity, Column, Unique, BeforeInsert, BeforeUpdate } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-import { CustomBaseEntity } from '../../common/baseEntity';
+import { CustomBaseEntity } from '../../common/base-entity';
 
 @Entity({ name: 'users' })
-@Unique(['email', 'username', 'mobile'])
+@Unique(['email'])
 export class UserEntity extends CustomBaseEntity {
   @Column({ nullable: true })
   username: string;
@@ -14,8 +14,11 @@ export class UserEntity extends CustomBaseEntity {
   @IsEmail()
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
+
+  @Column({ default: false })
+  is_email_verified: boolean;
 
   @Column({ nullable: true })
   mobile: string;
@@ -29,5 +32,8 @@ export class UserEntity extends CustomBaseEntity {
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hashSync(password, this.password);
     return hash === this.password;
+  }
+  async compare(password: string): Promise<boolean> {
+    return await bcrypt.compareSync(password, this.password);
   }
 }

@@ -1,15 +1,41 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import jwt from 'jsonwebtoken';
+import { UserResponseInterface } from './interface/user-response.interface';
+import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { LoginUserDto } from './dto/login-user.dto';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @UsePipes(new ValidationPipe())
+  async create(
+    @Body('user') createUserDto: CreateUserDto,
+  ): Promise<UserResponseInterface> {
+    const user = await this.userService.create(createUserDto);
+    return this.userService.buildUserResponse(user);
+  }
+
+  @Post('/login')
+  @UsePipes(new ValidationPipe())
+  async login(
+    @Body('user') loginUserDto: LoginUserDto,
+  ): Promise<UserResponseInterface> {
+    const user = await this.userService.login(loginUserDto);
+    return this.userService.buildUserResponse(user);
   }
 
   @Get()
@@ -19,7 +45,7 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findOne(id);
   }
 
   @Patch(':id')
