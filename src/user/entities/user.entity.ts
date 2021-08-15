@@ -1,3 +1,5 @@
+import { ArticleEntity } from './../../article/entities/article.entity';
+import { AddressEntity } from './address.entity';
 import { ImageEntity } from './image.entity';
 import { IsEmail } from 'class-validator';
 import {
@@ -8,6 +10,9 @@ import {
   BeforeUpdate,
   JoinColumn,
   OneToOne,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
@@ -39,8 +44,17 @@ export class UserEntity extends CustomBaseEntity {
   })
   image?: ImageEntity;
 
+  @OneToMany(() => AddressEntity, (address) => address.user)
+  addresses: AddressEntity[];
+
+  @OneToMany(() => ArticleEntity, (article) => article.author)
+  articles: ArticleEntity[];
+
+  @ManyToMany(() => ArticleEntity)
+  @JoinTable()
+  favorites: ArticleEntity[];
+
   @BeforeInsert()
-  @BeforeUpdate()
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 10);
   }

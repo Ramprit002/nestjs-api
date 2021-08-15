@@ -1,9 +1,11 @@
 {
   "cSpell.words": [
     "POSTGRES",
+    "favorited",
     "nestjs",
     "ormconfig",
     "timestamptz",
-    "typeorm"
+    "typeorm",
+    "varchar"
   ]
 }
